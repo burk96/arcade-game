@@ -1,25 +1,13 @@
 let gridX = 20;
 let gridY = 30;
-let canvasGrid = buildCanvas(gridX, gridY);
+let fps = 2;
+let clock;
+let snake;
 
 // initial state
 let gameState = {
-  canvas: canvasGrid,
-};
-
-let snake = {
-  body: [
-    [10, 5],
-    [10, 6],
-    [10, 7],
-    [10, 8], //Made it unusually long for debugging
-    [10, 9],
-    [10, 10],
-    [10, 11],
-    [10, 12],
-    [10, 13],
-  ],
-  nextDirection: [0, 0],
+  canvas: buildCanvas(gridX, gridY),
+  isRunning: false,
 };
 
 function buildCanvas(x, y) {
@@ -36,12 +24,6 @@ function buildCanvas(x, y) {
   return canvas;
 }
 
-function buildInitialState() {
-  renderState();
-  buildSnake();
-}
-
-// render the state
 function renderState() {
   const canvasElement = $("#canvas");
   canvasElement.empty();
@@ -49,7 +31,7 @@ function renderState() {
   gameState.canvas.forEach(function (row, rowIndex) {
     row.forEach(function (segment, segmentIndex) {
       const segmentElement = $(
-        `<div class="segment" data-x="${rowIndex}" data-y="${segmentIndex}"></div>`
+        `<div class="segment" data-x="${segmentIndex}" data-y="${rowIndex}"></div>`
       );
       canvasElement.append(segmentElement);
     });
@@ -81,86 +63,128 @@ function buildSnake() {
   });
 }
 
-//Maybe move logic to here
+function dropFood(foodType = "apple") {
+  let foodX = Math.floor(Math.random() * gridX);
+  let foodY = Math.floor(Math.random() * gridY);
+  let food = [foodX, foodY];
+
+  const foodElement = $(`[data-x="${foodX}"][data-y="${foodY}"]`);
+  foodElement.addClass(`${foodType}`);
+}
+
 function collisionDetect() {
   const snakeHead = snake.body[0];
 
   //checks if we go out of bounds
   if (
     snakeHead[0] < 0 ||
-    snakeHead[0] >= gridY ||
+    snakeHead[0] >= gridX ||
     snakeHead[1] < 0 ||
-    snakeHead[1] >= gridX
+    snakeHead[1] >= gridY
   ) {
     gameOver("Snake left gameboard!");
   }
 
   //detects if the snake head is touching the body
-  snake.body.slice(1).forEach(function (coordinates) {
-    if (coordinates == snakeHead) {
+  snake.body.forEach(function (coordinates, coordinateIndex) {
+    if (
+      coordinateIndex !== 0 &&
+      JSON.stringify(coordinates) == JSON.stringify(snakeHead)
+    ) {
       gameOver("Snake ate itself!");
     }
   });
 }
 
+function resetSnake() {
+  snake = {
+    body: [
+      [10, 5],
+      [10, 6],
+      [10, 7],
+      [10, 8],
+    ],
+    nextDirection: [0, 1],
+  };
+}
+
 function gameOver(reason) {
-  let score = snake.body.length - 4
-  alert("Game Over!\n" + reason + "\nYour snake grew " + score + " squares" );
-  snake.body = [
-    [10, 5],
-    [10, 6],
-    [10, 7],
-    [10, 8], //Made it unusually long for debugging
-    [10, 9],
-    [10, 10],
-    [10, 11],
-    [10, 12],
-    [10, 13],
-  ];
-  snake.nextDirection = [0, 0];
+  let score = snake.body.length - 4;
+  alert("Game Over!\n" + reason + "\nYour snake grew " + score + " squares");
+  stopGame();
+  buildInitialState();
 }
 
-// listeners
-function onBoardClick() {
-  // update state, maybe with another dozen or so helper functions...
-
-  renderState(); // show the user the new state
+function buildInitialState() {
+  resetSnake();
+  renderState();
+  buildSnake();
+  dropFood();
 }
-
-$(".board").on("click", onBoardClick); // etc
 
 // refresh the screen in an interval
 function tick() {
-  // this is an incremental change that happens to the state every time you update...
-
   buildSnake();
   collisionDetect();
 }
 
-setInterval(tick, 1000 / 2); // as close to 30 frames per second as possible
+function startGame() {
+  clock = setInterval(tick, 1000 / fps); //default is 30
+  $(".start-button").text("Stop");
+  $(".start-button").css({ "background-color": "red" });
+  gameState.isRunning = true;
+}
+
+function stopGame() {
+  clearInterval(clock);
+  $(".start-button").text("Start");
+  $(".start-button").css({ "background-color": "green" });
+  gameState.isRunning = false;
+}
+
+function setFPS(desiredFPS) {
+  fps = desiredFPS;
+  if (gameState.isRunning) {
+    stopGame();
+    startGame();
+  }
+}
+
+$(".start-button").click(function (event) {
+  event.preventDefault();
+  gameState.isRunning ? stopGame() : startGame();
+});
 
 $(window).on("keydown", function (event) {
   // here you might read which key was pressed and update the state accordingly
   switch (event.which) {
     case 37:
       //left
-      snake.nextDirection = [0, -1];
+      if (gameState.isRunning) {
+        snake.nextDirection = [-1, 0];
+      }
       break;
     case 38:
       //up
-      snake.nextDirection = [-1, 0];
+      if (gameState.isRunning) {
+        snake.nextDirection = [0, -1];
+      }
       break;
     case 39:
       //right
-      snake.nextDirection = [0, 1];
+      if (gameState.isRunning) {
+        snake.nextDirection = [1, 0];
+      }
       break;
     case 40:
       //down
-      snake.nextDirection = [1, 0];
+      if (gameState.isRunning) {
+        snake.nextDirection = [0, 1];
+      }
       break;
     case 32:
-      //space to pause
-      snake.nextDirection = [0, 0];
+      //space to start/stop
+      gameState.isRunning ? stopGame() : startGame();
       break;
     default:
       break;
