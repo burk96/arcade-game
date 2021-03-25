@@ -1,9 +1,9 @@
 let gridX = 20;
 let gridY = 30;
-let fps = 2;
+let fps = 10;
 let clock;
 let snake;
-let food = [];
+let foodArray = [];
 let grow = false;
 
 // initial state
@@ -88,25 +88,25 @@ function createFood(foodType = "apple") {
     coordinates: [foodX, foodY],
     type: foodType,
   };
-  food.push(foodItem);
+  foodArray.push(foodItem);
 }
 
 function removeFood(type) {
   // Finds the index of the Foodtype in the food array
-  let index = food
+  let index = foodArray
     .map(function (food) {
       return food.type;
     })
     .indexOf(type);
 
-  let coordinates = food[index].coordinates;
+  let coordinates = foodArray[index].coordinates;
 
   let foodElement = $(
     `[data-x="${coordinates[0]}"][data-y="${coordinates[1]}"]`
   );
 
   foodElement.removeClass(type);
-  food.pop(index);
+  foodArray.pop(index);
 }
 
 function collisionDetect() {
@@ -141,7 +141,7 @@ function foodCheck() {
   // Loops through food array and will check type if collision
   const snakeHead = snake.body[0];
 
-  food.forEach(function (food) {
+  foodArray.forEach(function (food) {
     if (JSON.stringify(food.coordinates) === JSON.stringify(snakeHead)) {
       switch (food.type) {
         case "apple":
@@ -168,6 +168,10 @@ function resetSnake() {
   };
 }
 
+function resetFood() {
+  foodArray = [];
+}
+
 function gameOver(reason) {
   let score = snake.body.length - 4;
   alert("Game Over!\n" + reason + "\nYour snake grew " + score + " squares");
@@ -177,6 +181,7 @@ function gameOver(reason) {
 
 function buildInitialState() {
   resetSnake();
+  resetFood();
   renderState();
   buildSnake();
   createFood();
@@ -212,6 +217,20 @@ function setFPS(desiredFPS) {
   }
 }
 
+$(".difficulty-button").click(function (event) {
+  event.preventDefault();
+  if ($(this).hasClass("easy-mode")) {
+    setFPS(5);
+  } else if ($(this).hasClass("normal-mode")) {
+    setFPS(10);
+  } else if ($(this).hasClass("hard-mode")) {
+    setFPS(20);
+  }
+
+  $(".difficulty-button").removeClass("selected");
+  $(this).addClass("selected");
+});
+
 $(".start-button").click(function (event) {
   event.preventDefault();
   gameState.isRunning ? stopGame() : startGame();
@@ -222,25 +241,25 @@ $(window).on("keydown", function (event) {
   switch (event.which) {
     case 37:
       //left
-      if (gameState.isRunning) {
+      if (gameState.isRunning && snake.nextDirection[0] !== 1) {
         snake.nextDirection = [-1, 0];
       }
       break;
     case 38:
       //up
-      if (gameState.isRunning) {
+      if (gameState.isRunning && snake.nextDirection[1] !== 1) {
         snake.nextDirection = [0, -1];
       }
       break;
     case 39:
       //right
-      if (gameState.isRunning) {
+      if (gameState.isRunning && snake.nextDirection[0] !== -1) {
         snake.nextDirection = [1, 0];
       }
       break;
     case 40:
       //down
-      if (gameState.isRunning) {
+      if (gameState.isRunning && snake.nextDirection[1] !== -1) {
         snake.nextDirection = [0, 1];
       }
       break;
