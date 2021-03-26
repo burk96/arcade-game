@@ -63,6 +63,16 @@ header {
   padding-right: 1rem;
 }
 
+.scoreboard {
+  grid-row: 2;
+  grid-column: 8/10;
+  color: white;
+  font-size: 2rem;
+  text-align: center;
+  background-color: grey;
+  border: 5px solid darkgrey;
+}
+
 .controls {
   grid-column: 8/10;
   grid-row: 4/7;

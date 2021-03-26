@@ -10,6 +10,10 @@ let grow = false;
 let gameState = {
   canvas: buildCanvas(gridX, gridY),
   isRunning: false,
+  player: {
+    name: "",
+    score: 0,
+  }
 };
 
 function buildCanvas(x, y) {
@@ -148,6 +152,7 @@ function foodCheck() {
           removeFood("apple");
           createFood("apple");
           grow = true;
+          gameState.player.score++;
           break;
         default:
           break;
@@ -172,9 +177,15 @@ function resetFood() {
   foodArray = [];
 }
 
+function showScore() {
+  let score = gameState.player.score;
+  $(".player-score").text(score);
+}
+
 function gameOver(reason) {
-  let score = snake.body.length - 4;
+  let score = gameState.player.score;
   alert("Game Over!\n" + reason + "\nYour snake grew " + score + " squares");
+  gameState.player.score = 0;
   stopGame();
   buildInitialState();
 }
@@ -193,6 +204,7 @@ function tick() {
   collisionDetect();
   outOfBoundsDetect();
   foodCheck();
+  showScore();
 }
 
 function startGame() {
@@ -234,6 +246,7 @@ $(".difficulty-button").click(function (event) {
 $(".start-button").click(function (event) {
   event.preventDefault();
   gameState.isRunning ? stopGame() : startGame();
+  $(this).blur();
 });
 
 $(window).on("keydown", function (event) {
@@ -241,24 +254,28 @@ $(window).on("keydown", function (event) {
   switch (event.which) {
     case 37:
       //left
+      console.log("Case left button")
       if (gameState.isRunning && snake.nextDirection[0] !== 1) {
         snake.nextDirection = [-1, 0];
       }
       break;
     case 38:
       //up
+      console.log("Case up button")
       if (gameState.isRunning && snake.nextDirection[1] !== 1) {
         snake.nextDirection = [0, -1];
       }
       break;
     case 39:
       //right
+      console.log("Case right button")
       if (gameState.isRunning && snake.nextDirection[0] !== -1) {
         snake.nextDirection = [1, 0];
       }
       break;
     case 40:
       //down
+      console.log("Case down button")
       if (gameState.isRunning && snake.nextDirection[1] !== -1) {
         snake.nextDirection = [0, 1];
       }
