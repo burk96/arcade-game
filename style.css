@@ -125,3 +125,19 @@ header {
 .selected {
   border: 5px solid blue;
 }
+
+/* Kind of a hack to make it look nice on 1080p fullscreen */
+/* It looks great as half the screen :p */
+@media (min-width: 960px) {
+  #canvas {
+    grid-column: 4/7;
+  }
+
+  .scoreboard {
+    grid-column: 8;
+  }
+  
+  .controls {
+    grid-column: 8;
+  }
+}
