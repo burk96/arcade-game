@@ -3,6 +3,4 @@
 
 A simple snake game built in JS
 
-[![Snake Game](https://i.imgur.com/fJhB2zc.png)](https://snakejssss.netlify.app/)
-
-*Screenshot not guaranteed to be up to date
+[![Snake Game](https://i.imgur.com/Te86vjU.png)](https://snakejssss.netlify.app/)
