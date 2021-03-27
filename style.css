@@ -85,6 +85,24 @@ header {
   border: 5px solid darkgrey;
 }
 
+.cheat {
+  grid-column: 8/10;
+  grid-row: 8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  background-color: grey;
+  border: 5px solid darkgrey;
+}
+
+.cheat-button {
+  color: white;
+  border: 5px solid white;
+  background-color: purple;
+  padding: 15px;
+}
+
 .instructions {
   grid-row: 1 / 1;
   grid-column: 1 / 6;
@@ -138,6 +156,10 @@ header {
   }
   
   .controls {
+    grid-column: 8;
+  }
+
+  .cheat {
     grid-column: 8;
   }
 }

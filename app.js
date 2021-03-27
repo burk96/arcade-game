@@ -5,6 +5,7 @@ let clock;
 let snake;
 let foodArray = [];
 let grow = false;
+let cheatsActive = false;
 
 // initial state
 let gameState = {
@@ -13,7 +14,7 @@ let gameState = {
   player: {
     name: "",
     score: 0,
-  }
+  },
 };
 
 function buildCanvas(x, y) {
@@ -114,17 +115,19 @@ function removeFood(type) {
 }
 
 function collisionDetect() {
-  const snakeHead = snake.body[0];
+  if (!cheatsActive) {
+    const snakeHead = snake.body[0];
 
-  //detects if the snake head is touching the body
-  snake.body.forEach(function (coordinates, coordinateIndex) {
-    if (
-      coordinateIndex !== 0 &&
-      JSON.stringify(coordinates) == JSON.stringify(snakeHead)
-    ) {
-      gameOver("Snake ate itself!");
-    }
-  });
+    //detects if the snake head is touching the body
+    snake.body.forEach(function (coordinates, coordinateIndex) {
+      if (
+        coordinateIndex !== 0 &&
+        JSON.stringify(coordinates) == JSON.stringify(snakeHead)
+      ) {
+        gameOver("Snake ate itself!");
+      }
+    });
+  }
 }
 
 function outOfBoundsDetect() {
@@ -159,6 +162,34 @@ function foodCheck() {
       }
     }
   });
+}
+
+function cheat() {
+  if (cheatsActive) {
+    let index = foodArray
+      .map(function (food) {
+        return food.type;
+      })
+      .indexOf("apple");
+
+    let foodTarget = foodArray[index].coordinates;
+
+    const snakeHead = snake.body[0];
+
+    if (foodTarget[0] !== snakeHead[0]) {
+      if (foodTarget[0] > snakeHead[0]) {
+        snake.nextDirection = [1, 0];
+      } else {
+        snake.nextDirection = [-1, 0];
+      }
+    } else if (foodTarget[1] !== snakeHead[1]) {
+      if (foodTarget[1] > snakeHead[1]) {
+        snake.nextDirection = [0, 1];
+      } else {
+        snake.nextDirection = [0, -1];
+      }
+    }
+  }
 }
 
 function resetSnake() {
@@ -205,6 +236,7 @@ function tick() {
   outOfBoundsDetect();
   foodCheck();
   showScore();
+  cheat();
 }
 
 function startGame() {
@@ -243,6 +275,18 @@ $(".difficulty-button").click(function (event) {
   $(this).addClass("selected");
 });
 
+$(".cheat-button").click(function (event) {
+  event.preventDefault();
+  if (cheatsActive) {
+    $(".cheat-button").removeClass("selected");
+    cheatsActive = false;
+  } else {
+    $(".cheat-button").addClass("selected");
+    cheatsActive = true;
+  }
+  $(this).blur();
+});
+
 $(".start-button").click(function (event) {
   event.preventDefault();
   gameState.isRunning ? stopGame() : startGame();
@@ -254,28 +298,24 @@ $(window).on("keydown", function (event) {
   switch (event.which) {
     case 37:
       //left
-      console.log("Case left button")
       if (gameState.isRunning && snake.nextDirection[0] !== 1) {
         snake.nextDirection = [-1, 0];
       }
       break;
     case 38:
       //up
-      console.log("Case up button")
       if (gameState.isRunning && snake.nextDirection[1] !== 1) {
         snake.nextDirection = [0, -1];
       }
       break;
     case 39:
       //right
-      console.log("Case right button")
       if (gameState.isRunning && snake.nextDirection[0] !== -1) {
         snake.nextDirection = [1, 0];
       }
       break;
     case 40:
       //down
-      console.log("Case down button")
       if (gameState.isRunning && snake.nextDirection[1] !== -1) {
         snake.nextDirection = [0, 1];
       }
